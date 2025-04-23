@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book List</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h1 class="text-center mb-4">📚 Book Collection</h1>
+
+    <input type="text" id="authorSearch" placeholder="Search by author..." class="form-control mb-3" />
+
+    <div id="bookList" class="row g-4"></div>
+
+    <div class="text-center mt-4">
+      <a href="add.html" class="btn btn-success">➕ Add New Book</a>
+    </div>
+  </div>
+
+  <script>
+    const listContainer = document.getElementById('bookList');
+    const searchInput = document.getElementById('authorSearch');
+
+    async function fetchBooks(author = '') {
+      try {
+        const res = await fetch(`http://localhost:5000/api/books?author=${author}`);
+        const books = await res.json();
+
+        if (books.length === 0) {
+          listContainer.innerHTML = `<p class="text-center">No books found.</p>`;
+          return;
+        }
+
+        listContainer.innerHTML = books.map(book => `
+          <div class="col-md-4">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">${book.title}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">${book.author}</h6>
+                <p class="card-text">Price: <strong>$${book.price}</strong></p>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        listContainer.innerHTML = `<p class="text-danger text-center">Error fetching books.</p>`;
+        console.error(err);
+      }
+    }
+
+    searchInput?.addEventListener('input', e => fetchBooks(e.target.value));
+    fetchBooks();
+  </script>
+</body>
+</html>
